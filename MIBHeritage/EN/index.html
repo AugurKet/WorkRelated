@@ -1,0 +1,150 @@
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <title>Manulife Heritage Challenge</title>
+    <style>
+        /* 进阶彩色样式 */
+        :root { --primary: #00A764; --secondary: #007c5a; --bg: #f0f7f4; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #e0f2f1, #ffffff); min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { color: var(--primary); text-align: center; margin-bottom: 30px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        
+        /* 题目卡片动画 */
+        .question-card { background: white; padding: 25px; margin-bottom: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: transform 0.3s; border-left: 8px solid var(--primary); }
+        .question-card:hover { transform: translateY(-5px); }
+        
+        /* 选项按钮美化 */
+        .option { display: block; padding: 15px; margin: 10px 0; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .option:hover { background: #e8f5e9; border-color: var(--primary); }
+        input[type="radio"]:checked + span { color: var(--primary); font-weight: bold; }
+        
+        /* 进度条 */
+        #progress-bar { height: 8px; background: #ddd; border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+        #progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s; }
+        
+        button { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 50px; font-size: 20px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,167,100,0.3); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Manulife Heritage 挑战赛</h1>
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+    <div id="quiz-container"></div>
+    <button onclick="submitQuiz()">交卷！查看我的专家级别</button>
+    <div id="result" style="margin-top:20px;"></div>
+</div>
+
+<script>
+    // 放入你那 30 题的代码...
+const questions = [
+  { q: "1. Which of the following is NOT a premium payment term option for Manulife Heritage?", options: ["6 years", "10 years", "15 years", "20 years"], answer: 2, exp: "15 years is not an option." },
+    { q: "2. What is the minimum annual basic premium (Insurance Premium) for the annual payment mode?", options: ["RM 1,200", "RM 2,000", "RM 2,400", "RM 3,000"], answer: 2, exp: "The minimum is RM 2,400." },
+    { q: "3. If the premium payment term is 6 years, what is the minimum entry age (Age Next Birthday)?", options: ["0", "18", "25", "30"], answer: 0, exp: "It is generally available from age 0." },
+    { q: "4. Which of the following is NOT a core feature of Manulife Heritage?", options: ["Lifetime coverage", "Face Amount Reset feature", "Guaranteed renewability up to age 100", "Investment-linked nature"], answer: 2, exp: "The product does not have guaranteed renewability up to 100." },
+    { q: "5. When a client chooses Premium Financing, what requirement must be met?", options: ["Personal credit score", "Specific financial underwriting standards", "Policy value must exceed 500k", "No specific requirements"], answer: 1, exp: "It must meet specific financial underwriting standards." },
+    { q: "6. How often does the Protection Booster automatically increase the face amount?", options: ["Every 5 years", "Every 10 years", "Every 15 years", "Every 20 years"], answer: 1, exp: "Every 10 consecutive policy years." },
+    { q: "7. What is the percentage increase provided by the Protection Booster?", options: ["2%", "5%", "10%", "15%"], answer: 1, exp: "5% of the basic face amount." },
+    { q: "8. What is the additional payout ratio for Accidental Death due to Natural Disaster?", options: ["100%", "200%", "300%", "400%"], answer: 3, exp: "The highest bracket is 400%." },
+    { q: "9. What is the additional payout ratio for Accidental Death in public transport?", options: ["100%", "200%", "300%", "400%"], answer: 1, exp: "It is 200%." },
+    { q: "10. What is the additional payout ratio for Accidental Death outside Malaysia?", options: ["100%", "200%", "300%", "400%"], answer: 2, exp: "It is 300%." },
+    { q: "11. What is the Wellness Reward?", options: ["Claim reward", "Premium discount", "Reward for meeting health check requirements", "Anniversary bonus"], answer: 2, exp: "Related to health management/check-up requirements." },
+    { q: "12. When does the Loyalty Bonus typically start?", options: ["5th policy year", "10th policy year", "15th policy year", "20th policy year"], answer: 1, exp: "Typically starts from the 10th policy year." },
+    { q: "13. When is the Maturity Bonus paid out?", options: ["Policy anniversary", "Upon death of the insured", "At policy maturity", "Upon partial withdrawal"], answer: 2, exp: "Paid at policy maturity." },
+    { q: "14. What is the basis for Accidental Disability benefit payout?", options: ["Cash Value", "Account Value", "Basic Face Amount", "Total Premiums"], answer: 2, exp: "Based on the basic Face Amount." },
+    { q: "15. How is the Face Amount primarily increased?", options: ["Market fluctuations", "Protection Booster", "Premium financing", "Fund switching"], answer: 1, exp: "Protection Booster is the primary mechanism." },
+    { q: "16. Which is a prerequisite for Cover Reset?", options: ["At least 5 years of premium payments", "No claim records", "Age over 50", "Investment return > 5%"], answer: 1, exp: "Must have no claim records." },
+    { q: "17. How long must pass since the last partial withdrawal to apply for Cover Reset?", options: ["12 months", "23 months", "36 months", "48 months"], answer: 1, exp: "At least 23 months." },
+    { q: "18. What is the core function of the No Lapse Guarantee (NLG) clause?", options: ["Ensure claim payout", "Ensure policy doesn't lapse due to insufficient account value", "Ensure high dividends", "Ensure fixed premiums"], answer: 1, exp: "Ensures the policy stays in force under specific conditions." },
+    { q: "19. Does partial withdrawal affect the basic Face Amount?", options: ["No", "Yes, may reduce the face amount", "Yes, doubles the face amount", "Only affects cash value"], answer: 1, exp: "Partial withdrawal reduces the face amount." },
+    { q: "20. What is a Modal Factor?", options: ["Premium frequency coefficient", "Age coefficient", "Risk coefficient", "Fund allocation coefficient"], answer: 0, exp: "Used to adjust premiums for different payment frequencies." },
+    { q: "21. Under what conditions can a client increase the Face Amount?", options: ["Anytime", "During specific window periods subject to underwriting", "Only one year before maturity", "Cannot be increased"], answer: 1, exp: "Subject to specific windows and underwriting." },
+    { q: "22. What is the relationship between Account Value and Face Amount?", options: ["Always equal", "Death benefit is the higher of the two", "Account value must be > Face Amount", "Unrelated"], answer: 1, exp: "Death benefit is usually the higher of the two." },
+    { q: "23. What does Advance Premium mean?", options: ["Prepaid premium", "Overdue premium", "Financed premium", "Additional premium"], answer: 0, exp: "Premium paid in advance." },
+    { q: "24. After a partial withdrawal, what happens to the face amount after Cover Reset?", options: ["Remains unchanged", "Restores to original amount", "Reduces by 50%", "Permanently expires"], answer: 1, exp: "Restores to the original amount." },
+    { q: "25. What is the premium allocation policy?", options: ["Only one fund allowed", "Can be allocated to multiple funds", "All into cash value", "Specified by company"], answer: 1, exp: "Can be diversified across multiple funds." },
+    { q: "26. Which situation triggers additional accidental death benefit?", options: ["Natural death", "Critical illness", "Natural disaster", "Suicide"], answer: 2, exp: "Natural disaster is considered an accidental death." },
+    { q: "27. If face amount is reduced due to partial withdrawal, how can it be restored?", options: ["Buy new policy", "Cover Reset", "Change policyowner", "Cancel all riders"], answer: 1, exp: "Cover Reset restores the face amount." },
+    { q: "28. Besides the basic premium, what can be included when purchasing Manulife Heritage?", options: ["Commissions", "Attachable Riders", "Company stock", "Property mortgage"], answer: 1, exp: "Can attach various riders." },
+    { q: "29. What is a Renewal Benefit?", options: ["Reward for premium renewal", "Guaranteed renewal under specific conditions", "Right to change insured", "Surrender refund"], answer: 1, exp: "Specific renewal rights in the contract." },
+    { q: "30. Why is this product suitable for long-term holding?", options: ["Short-term speculative value", "Long-term accumulation bonuses and increasing face amount", "Zero risk", "It's a bank deposit"], answer: 1, exp: "Long-term bonuses and increasing face amount are key." }
+];
+  
+    const container = document.getElementById('quiz-container');
+    questions.forEach((item, index) => {
+        let html = `<div class="question-card"><p><strong>${index+1}. ${item.q}</strong></p>`;
+        item.options.forEach((opt, i) => {
+            html += `<label class="option"><input type="radio" name="q${index}" value="${i}" onclick="updateProgress()"> <span>${opt}</span></label>`;
+        });
+        container.innerHTML += html + `</div>`;
+    });
+
+    function updateProgress() {
+        const total = questions.length;
+        const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+        document.getElementById('progress-fill').style.width = (answered / total * 100) + '%';
+    }
+
+    function submitQuiz() {
+        let score = 0;
+        let unanswered = 0;
+        let resultHtml = "<h2>你的成绩分析：</h2>";
+
+        questions.forEach((item, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (!selected) {
+                unanswered++;
+                return;
+            }
+            
+            const userAns = parseInt(selected.value);
+            const isCorrect = (userAns === item.answer);
+            if (isCorrect) {
+                score += (100 / questions.length);
+            }
+        });
+
+        if (unanswered > 0) {
+            alert("You have " + unanswered + " unanswered question！");
+            return;
+        }
+
+        // 显示分数
+        const finalScore = Math.round(score);
+        resultHtml += `<p style="font-size:24px; font-weight:bold; color:var(--primary);">Your Score is：${finalScore} 分</p>`;
+        
+        if (finalScore >= 80) {
+            resultHtml += `<p>🏆 Awesome！</p>`;
+            showConfetti(); // 触发烟花
+        } else if (finalScore >= 60) {
+            resultHtml += `<p>👍 Not bad, keep it up！</p>`;
+        } else {
+            resultHtml += `<p>💪 You need to catch up！</p>`;
+        }
+
+        document.getElementById('result').innerHTML = resultHtml;
+        window.scrollTo(0, document.getElementById('result').offsetTop);    
+    }
+  
+  // 在 script 最后加入这个函数
+  function showConfetti() {
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+    const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+        
+        const particleCount = 50 * (timeLeft / duration);
+        // 调用第三方烟花库 (需在头部引入下面这一行)
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+    }, 250);
+}
+</script>
+</body>
+</html>
