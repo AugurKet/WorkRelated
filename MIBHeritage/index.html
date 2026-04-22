@@ -87,11 +87,44 @@ const questions = [
     }
 
     function submitQuiz() {
-        // ... (保持原本的评分逻辑)
-      if (score >= 80) {
-      showConfetti(); // 只要分数及格，就开始喷烟花！
-      alert("恭喜你！挑战成功！");
-      }
+        let score = 0;
+        let unanswered = 0;
+        let resultHtml = "<h2>你的成绩分析：</h2>";
+
+        questions.forEach((item, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (!selected) {
+                unanswered++;
+                return;
+            }
+            
+            const userAns = parseInt(selected.value);
+            const isCorrect = (userAns === item.answer);
+            if (isCorrect) {
+                score += (100 / questions.length);
+            }
+        });
+
+        if (unanswered > 0) {
+            alert("请回答完所有 " + unanswered + " 道未完成的题目后再交卷！");
+            return;
+        }
+
+        // 显示分数
+        const finalScore = Math.round(score);
+        resultHtml += `<p style="font-size:24px; font-weight:bold; color:var(--primary);">你的总分是：${finalScore} 分</p>`;
+        
+        if (finalScore >= 80) {
+            resultHtml += `<p>🏆 专家级表现！太棒了！</p>`;
+            showConfetti(); // 触发烟花
+        } else if (finalScore >= 60) {
+            resultHtml += `<p>👍 表现不错！继续加油！</p>`;
+        } else {
+            resultHtml += `<p>💪 需要再复习一下产品资料哦！</p>`;
+        }
+
+        document.getElementById('result').innerHTML = resultHtml;
+        window.scrollTo(0, document.getElementById('result').offsetTop);    
     }
   
   // 在 script 最后加入这个函数
