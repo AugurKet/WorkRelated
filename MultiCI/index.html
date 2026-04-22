@@ -1,0 +1,1038 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manulife MultiCI Enrich — Knowledge Quiz</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0D2240;--teal:#00827F;--teallt:#E1F5EE;
+  --gold:#C9973D;--goldlt:#FFFBEB;
+  --green:#065F46;--greenlt:#ECFDF5;
+  --red:#991B1B;--redlt:#FEF2F2;
+  --gray:#F1F5F9;--dgray:#1E293B;--mgray:#64748B;
+  --white:#ffffff;--border:#E2E8F0;
+}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#F8FAFC;color:var(--dgray);min-height:100vh}
+
+/* ── header ── */
+header{background:var(--navy);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:baseline;gap:6px}
+.logo-m{font-size:18px;font-weight:700;color:#fff;letter-spacing:1px}
+.logo-p{font-size:14px;color:var(--gold);font-weight:500}
+.lang-btn{background:transparent;border:1px solid rgba(255,255,255,0.3);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.2s}
+.lang-btn:hover{background:rgba(255,255,255,0.1)}
+
+/* ── screens ── */
+.screen{display:none;max-width:720px;margin:0 auto;padding:24px 16px}
+.screen.active{display:block}
+
+/* ── splash ── */
+.splash-card{background:var(--white);border:0.5px solid var(--border);border-radius:16px;padding:40px 36px;text-align:center}
+.splash-icon{width:72px;height:72px;background:var(--navy);border-radius:16px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center}
+.splash-icon svg{width:36px;height:36px;fill:var(--gold)}
+.splash-h1{font-size:26px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.splash-sub{font-size:14px;color:var(--mgray);margin-bottom:28px;line-height:1.6}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:28px}
+.stat-box{background:var(--gray);border-radius:10px;padding:14px 10px;text-align:center}
+.stat-num{font-size:24px;font-weight:700;color:var(--navy)}
+.stat-lbl{font-size:12px;color:var(--mgray);margin-top:2px}
+.btn-start{background:var(--teal);color:#fff;border:none;padding:14px 40px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;width:100%;transition:background 0.2s}
+.btn-start:hover{background:#006b68}
+
+/* ── quiz ── */
+.progress-wrap{margin-bottom:20px}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.q-counter{font-size:13px;color:var(--mgray);font-weight:500}
+.score-live{font-size:13px;color:var(--teal);font-weight:600}
+.progress-bar{height:6px;background:var(--border);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;background:var(--teal);border-radius:99px;transition:width 0.4s ease}
+
+.category-tag{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;margin-bottom:12px;letter-spacing:0.3px}
+
+.q-card{background:var(--white);border:0.5px solid var(--border);border-radius:14px;padding:28px 28px 20px}
+.q-text-en{font-size:17px;font-weight:600;color:var(--navy);line-height:1.5;margin-bottom:8px}
+.q-text-cn{font-size:14px;color:var(--mgray);line-height:1.6;margin-bottom:24px;padding-left:10px;border-left:3px solid var(--gold)}
+
+.options{display:flex;flex-direction:column;gap:10px}
+.opt{background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all 0.15s;display:grid;grid-template-columns:1fr;gap:3px}
+.opt:hover:not(.answered){border-color:var(--teal);background:#f0faf8}
+.opt-en{font-size:14px;font-weight:500;color:var(--dgray)}
+.opt-cn{font-size:12px;color:var(--mgray)}
+.opt.correct{border-color:var(--green);background:var(--greenlt)}
+.opt.correct .opt-en,.opt.correct .opt-cn{color:var(--green)}
+.opt.wrong{border-color:var(--red);background:var(--redlt)}
+.opt.wrong .opt-en,.opt.wrong .opt-cn{color:var(--red)}
+.opt.show-correct{border-color:var(--teal);background:var(--teallt)}
+.opt.show-correct .opt-en,.opt.show-correct .opt-cn{color:#005f5c}
+
+.feedback{margin-top:16px;padding:14px 16px;border-radius:10px;font-size:13px;line-height:1.6}
+.feedback.correct-fb{background:var(--greenlt);border-left:4px solid var(--green)}
+.feedback.wrong-fb{background:var(--redlt);border-left:4px solid var(--red)}
+.feedback-head{font-weight:700;margin-bottom:4px;font-size:14px}
+.feedback.correct-fb .feedback-head{color:var(--green)}
+.feedback.wrong-fb .feedback-head{color:var(--red)}
+.feedback-exp{color:var(--dgray);margin-bottom:4px}
+.feedback-cn{color:var(--mgray);font-size:12px}
+
+.btn-next{margin-top:20px;background:var(--navy);color:#fff;border:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;width:100%;transition:background 0.2s}
+.btn-next:hover{background:#1a3a5c}
+
+/* ── results ── */
+.result-hero{background:var(--navy);border-radius:16px;padding:36px 28px;text-align:center;margin-bottom:24px;color:#fff}
+.result-score-big{font-size:60px;font-weight:700;color:var(--gold);line-height:1}
+.result-denom{font-size:20px;color:rgba(255,255,255,0.6);margin-top:4px}
+.result-grade{font-size:22px;font-weight:700;margin-top:12px}
+.result-sub{font-size:14px;color:rgba(255,255,255,0.7);margin-top:6px}
+.result-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px}
+.r-stat{background:var(--white);border:0.5px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.r-stat-n{font-size:26px;font-weight:700}
+.r-stat.correct .r-stat-n{color:var(--green)}
+.r-stat.wrong .r-stat-n{color:var(--red)}
+.r-stat.pct .r-stat-n{color:var(--teal)}
+.r-stat-l{font-size:12px;color:var(--mgray);margin-top:3px}
+
+.review-head{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:16px;padding-bottom:10px;border-bottom:0.5px solid var(--border)}
+.review-item{background:var(--white);border:0.5px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px}
+.review-num{font-size:11px;font-weight:700;color:var(--mgray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.review-q-en{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.review-q-cn{font-size:12px;color:var(--mgray);margin-bottom:10px}
+.review-ans-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:5px;font-size:13px}
+.ans-label{font-weight:600;min-width:72px;font-size:12px}
+.ans-label.correct-l{color:var(--green)}
+.ans-label.wrong-l{color:var(--red)}
+.ans-label.right-l{color:var(--teal)}
+.review-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;margin-bottom:10px}
+.badge-ok{background:var(--greenlt);color:var(--green)}
+.badge-no{background:var(--redlt);color:var(--red)}
+
+.btn-restart{background:var(--teal);color:#fff;border:none;padding:14px 40px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-top:24px;transition:background 0.2s}
+.btn-restart:hover{background:#006b68}
+
+@media(max-width:480px){
+  .q-card{padding:20px 16px 16px}
+  .splash-card{padding:28px 20px}
+  .stats-row,.result-stats{grid-template-columns:1fr 1fr}
+  .splash-h1{font-size:20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-m">MANULIFE</span>
+    <span class="logo-p">MultiCI Enrich · Knowledge Quiz</span>
+  </div>
+  <button class="lang-btn" id="langToggle" onclick="toggleLang()">中文</button>
+</header>
+
+<!-- SPLASH -->
+<div class="screen active" id="splashScreen">
+  <div class="splash-card">
+    <div class="splash-icon">
+      <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" fill="none" stroke="#C9973D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h1 class="splash-h1" id="sTitle">MultiCI Enrich — Knowledge Challenge</h1>
+    <p class="splash-sub" id="sSub">Test your knowledge of Manulife MultiCI Enrich across 50 bilingual questions. Covering product features, claims, payout limits, special benefits, and more.<br><br>多重危疾增益知识测验 — 50道双语题目全面考核产品知识。</p>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num">50</div><div class="stat-lbl" id="sQ">Questions 题目</div></div>
+      <div class="stat-box"><div class="stat-num">5</div><div class="stat-lbl" id="sC">Categories 类别</div></div>
+      <div class="stat-box"><div class="stat-num">EN/中</div><div class="stat-lbl" id="sL">Bilingual 双语</div></div>
+    </div>
+    <button class="btn-start" id="sBtn" onclick="startQuiz()">Start Quiz — 开始测验</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="quizScreen">
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="q-counter" id="qCounter">Question 1 / 50</span>
+      <span class="score-live" id="scoreLive">Score: 0</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:2%"></div></div>
+  </div>
+  <div class="q-card">
+    <span class="category-tag" id="catTag"></span>
+    <div class="q-text-en" id="qTextEn"></div>
+    <div class="q-text-cn" id="qTextCn"></div>
+    <div class="options" id="optionsWrap"></div>
+    <div class="feedback" id="feedback" style="display:none"></div>
+    <button class="btn-next" id="btnNext" style="display:none" onclick="nextQ()">Next Question →</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="resultsScreen">
+  <div class="result-hero">
+    <div id="rEmoji" style="font-size:40px;margin-bottom:10px"></div>
+    <div class="result-score-big" id="rScore"></div>
+    <div class="result-denom" id="rDenom">/ 50</div>
+    <div class="result-grade" id="rGrade"></div>
+    <div class="result-sub" id="rSub"></div>
+  </div>
+  <div class="result-stats">
+    <div class="r-stat correct"><div class="r-stat-n" id="rCorrect"></div><div class="r-stat-l" id="rCL">Correct 答对</div></div>
+    <div class="r-stat wrong"><div class="r-stat-n" id="rWrong"></div><div class="r-stat-l" id="rWL">Wrong 答错</div></div>
+    <div class="r-stat pct"><div class="r-stat-n" id="rPct"></div><div class="r-stat-l" id="rPL">Score % 得分率</div></div>
+  </div>
+  <div class="review-head" id="rReviewHead">Answer Review — 答案回顾</div>
+  <div id="reviewList"></div>
+  <button class="btn-restart" onclick="restartQuiz()" id="rRestart">Try Again — 重新测验</button>
+</div>
+
+<script>
+var lang = 'en';
+var questions = [
+  {cat:'Product Basics 产品基础',catColor:'#0D2240',catTxt:'#fff',
+   en:'What type of insurance product is Manulife MultiCI Enrich?',
+   cn:'宏利多重危疾增益是哪种类型的保险产品？',
+   opts:[
+     {en:'A unit-deducting critical illness rider',cn:'单位扣减式危疾附加险'},
+     {en:'A standalone whole life insurance plan',cn:'独立终身寿险计划'},
+     {en:'A medical card with hospitalisation cover',cn:'含住院保障的医疗卡'},
+     {en:'An investment-linked plan with savings',cn:'含储蓄的投资连结计划'}
+   ],ans:0,
+   expEn:'MultiCI Enrich is a unit-deducting CI rider — it must be attached to a basic ILP and charges are deducted by cancelling units from the investment account.',
+   expCn:'多重危疾增益是单位扣减式危疾附加险，必须附加在基本投资连结型保单上，费用通过注销账户单位来扣除。'},
+
+  {cat:'Product Basics 产品基础',catColor:'#0D2240',catTxt:'#fff',
+   en:'How many health conditions does MultiCI Enrich cover?',
+   cn:'多重危疾增益保障多少种健康状况？',
+   opts:[
+     {en:'36 conditions',cn:'36种病症'},
+     {en:'99 conditions',cn:'99种病症'},
+     {en:'188 conditions',cn:'188种病症'},
+     {en:'250 conditions',cn:'250种病症'}
+   ],ans:2,
+   expEn:'MultiCI Enrich covers 188 health conditions — significantly more than most traditional CI plans which cover 36–60 conditions.',
+   expCn:'多重危疾增益保障188种健康状况，远超大多数传统危疾险（通常只保障36至60种）。'},
+
+  {cat:'Product Basics 产品基础',catColor:'#0D2240',catTxt:'#fff',
+   en:'MultiCI Enrich can be attached to which basic plan(s)?',
+   cn:'多重危疾增益可附加至哪个基本计划？',
+   opts:[
+     {en:'ManuLink Essential or ManuLink Essential Plus',cn:'ManuLink Essential 或 ManuLink Essential Plus'},
+     {en:'ManuLink Premier only',cn:'仅ManuLink Premier'},
+     {en:'ManuSecure only',cn:'仅ManuSecure'},
+     {en:'Any Manulife investment-linked plan',cn:'任何宏利投资连结计划'}
+   ],ans:0,
+   expEn:'MultiCI Enrich can only be attached to ManuLink Essential or ManuLink Essential Plus as the basic plan.',
+   expCn:'多重危疾增益只能附加在ManuLink Essential或ManuLink Essential Plus基本计划上。'},
+
+  {cat:'Product Basics 产品基础',catColor:'#0D2240',catTxt:'#fff',
+   en:'Is MultiCI Enrich an accelerated or non-accelerated rider?',
+   cn:'多重危疾增益是加速型还是非加速型附加险？',
+   opts:[
+     {en:'Accelerated — it reduces the basic plan face amount',cn:'加速型 — 会减少基本计划保额'},
+     {en:'Non-accelerated — it does NOT reduce the basic plan face amount',cn:'非加速型 — 不会减少基本计划保额'},
+     {en:'Semi-accelerated — reduces face amount by 50%',cn:'半加速型 — 减少保额50%'},
+     {en:'It depends on the type of claim',cn:'取决于理赔类型'}
+   ],ans:1,
+   expEn:'MultiCI Enrich is non-accelerated — claim payouts are made in addition to and do not reduce the basic plan\'s face amount.',
+   expCn:'多重危疾增益是非加速型——理赔赔付额外支付，不会减少基本计划的保额。'},
+
+  {cat:'Product Basics 产品基础',catColor:'#0D2240',catTxt:'#fff',
+   en:'Up to what age does MultiCI Enrich provide coverage?',
+   cn:'多重危疾增益提供保障至多少岁？',
+   opts:[
+     {en:'Age 70',cn:'70岁'},
+     {en:'Age 80',cn:'80岁'},
+     {en:'Age 99',cn:'99岁'},
+     {en:'Age 65',cn:'65岁'}
+   ],ans:2,
+   expEn:'MultiCI Enrich covers the insured up to age 99 (next birthday).',
+   expCn:'多重危疾增益保障被保险人至99岁（下一个生日）。'},
+
+  {cat:'Claims & Payouts 理赔与赔付',catColor:'#00827F',catTxt:'#fff',
+   en:'What is the maximum total payout as a percentage of face amount under MultiCI Enrich?',
+   cn:'多重危疾增益的最高总赔付为保额的百分之多少？',
+   opts:[
+     {en:'500% of face amount',cn:'保额的500%'},
+     {en:'800% of face amount',cn:'保额的800%'},
+     {en:'870% of face amount',cn:'保额的870%'},
+     {en:'1000% of face amount',cn:'保额的1000%'}
+   ],ans:2,
+   expEn:'The overall maximum total benefit is 870% of the face amount, subject to RM5,000,000 per life.',
+   expCn:'整体最高总赔付为保额的870%，每人最高RM5,000,000。'},
+
+  {cat:'Claims & Payouts 理赔与赔付',catColor:'#00827F',catTxt:'#fff',
+   en:'What percentage of face amount is paid for an Early Stage or Intermediate Stage claim?',
+   cn:'早期或中期阶段理赔赔付保额的百分之多少？',
+   opts:[
+     {en:'100% of face amount per claim',cn:'每次理赔保额的100%'},
+     {en:'25% of face amount per claim',cn:'每次理赔保额的25%'},
+     {en:'50% of face amount per claim',cn:'每次理赔保额的50%'},
+     {en:'75% of face amount per claim',cn:'每次理赔保额的75%'}
+   ],ans:2,
+   expEn:'Early and Intermediate Stage claims pay up to 50% of face amount per claim, capped at RM300,000 per claim.',
+   expCn:'早期和中期阶段理赔每次最高赔付保额的50%，每次上限为RM300,000。'},
+
+  {cat:'Claims & Payouts 理赔与赔付',catColor:'#00827F',catTxt:'#fff',
+   en:'What is the per-claim cap for an Early or Intermediate Stage claim (excluding Admission Events)?',
+   cn:'早期或中期阶段理赔（不含入院事件）的每次赔付上限是多少？',
+   opts:[
+     {en:'RM 125,000',cn:'RM 125,000'},
+     {en:'RM 300,000',cn:'RM 300,000'},
+     {en:'RM 500,000',cn:'RM 500,000'},
+     {en:'RM 1,000,000',cn:'RM 1,000,000'}
+   ],ans:1,
+   expEn:'The per-claim cap for Early and Intermediate Stage events is RM300,000 (not including Admission Events, which are capped at RM125,000).',
+   expCn:'早期和中期阶段的每次赔付上限为RM300,000（入院事件每次上限为RM125,000）。'},
+
+  {cat:'Claims & Payouts 理赔与赔付',catColor:'#00827F',catTxt:'#fff',
+   en:'What is the per-claim cap for an Advanced Stage claim?',
+   cn:'晚期阶段理赔的每次赔付上限是多少？',
+   opts:[
+     {en:'RM 300,000',cn:'RM 300,000'},
+     {en:'RM 250,000',cn:'RM 250,000'},
+     {en:'RM 500,000',cn:'RM 500,000'},
+     {en:'RM 1,500,000',cn:'RM 1,500,000'}
+   ],ans:2,
+   expEn:'Advanced Stage claims are capped at RM500,000 per claim (100% of face amount up to this cap).',
+   expCn:'晚期阶段理赔每次上限为RM500,000（保额的100%，最高至此上限）。'},
+
+  {cat:'Claims & Payouts 理赔与赔付',catColor:'#00827F',catTxt:'#fff',
+   en:'What does the 800% refer to in MultiCI Enrich?',
+   cn:'多重危疾增益中的800%指的是什么？',
+   opts:[
+     {en:'Grand total of all benefits under the rider',cn:'附加险下所有保障利益的总计'},
+     {en:'Multi-Stage CI Benefit + Double Protection Benefit combined, before age 80',cn:'80岁前多阶段危疾利益与双重保障利益的合计'},
+     {en:'Special Benefits only (diabetic, mental illness, MCED)',cn:'仅特别保障利益（糖尿病、精神疾病、MCED）'},
+     {en:'The benefit payable only after age 80',cn:'仅80岁后支付的保障利益'}
+   ],ans:1,
+   expEn:'800% refers specifically to the combined Multi-Stage CI Benefit and Double Protection Benefit before age 80. The grand total including Special Benefits is 870%.',
+   expCn:'800%特指80岁前多阶段危疾利益与双重保障利益合计。包含特别保障利益的总计为870%。'},
+
+  {cat:'Claims & Payouts 理赔与赔付',catColor:'#00827F',catTxt:'#fff',
+   en:'After age 80, what percentage of face amount can still be claimed?',
+   cn:'80岁后仍可申请理赔保额的百分之多少？',
+   opts:[
+     {en:'No further claims allowed after age 80',cn:'80岁后不可再申请理赔'},
+     {en:'50% of face amount',cn:'保额的50%'},
+     {en:'100% of face amount (up to RM5M)',cn:'保额的100%（最高RM500万）'},
+     {en:'25% of face amount',cn:'保额的25%'}
+   ],ans:2,
+   expEn:'After age 80, 100% of the face amount (up to RM5,000,000) remains payable regardless of any previous claims.',
+   expCn:'80岁后，无论此前的理赔记录，仍可获得保额的100%（最高RM5,000,000）。'},
+
+  {cat:'Claims & Payouts 理赔与赔付',catColor:'#00827F',catTxt:'#fff',
+   en:'What is the Angioplasty benefit payout percentage and maximum?',
+   cn:'血管成形术（冠状动脉气球扩张术）的赔付比例及上限是多少？',
+   opts:[
+     {en:'50% of FA, max RM300,000, once only',cn:'保额50%，最高RM300,000，仅一次'},
+     {en:'10% of FA, max RM25,000, once only',cn:'保额10%，最高RM25,000，仅一次'},
+     {en:'20% of FA, max RM150,000, twice',cn:'保额20%，最高RM150,000，两次'},
+     {en:'100% of FA, max RM500,000',cn:'保额100%，最高RM500,000'}
+   ],ans:1,
+   expEn:'Angioplasty pays 10% of face amount, maximum RM25,000, payable once only per lifetime.',
+   expCn:'血管成形术赔付保额的10%，最高RM25,000，每人终身仅一次。'},
+
+  {cat:'Waiting & Survival 等待期与存活期',catColor:'#991B1B',catTxt:'#fff',
+   en:'What is the waiting period for most Advanced Stage conditions (excluding Heart Attack, Cancer, Coronary-related)?',
+   cn:'大多数晚期病症（不含心脏病发、癌症及冠状动脉相关）的等待期是多少天？',
+   opts:[
+     {en:'No waiting period',cn:'无等待期'},
+     {en:'30 days',cn:'30天'},
+     {en:'60 days',cn:'60天'},
+     {en:'90 days',cn:'90天'}
+   ],ans:1,
+   expEn:'Most Advanced Stage conditions have a 30-day waiting period (excluding Heart Attack, Cancer, and Coronary Artery-related conditions).',
+   expCn:'大多数晚期病症的等待期为30天（不含心脏病发、癌症及冠状动脉相关病症）。'},
+
+  {cat:'Waiting & Survival 等待期与存活期',catColor:'#991B1B',catTxt:'#fff',
+   en:'What is the waiting period for Early and Intermediate Stage conditions?',
+   cn:'早期和中期阶段病症的等待期是多少天？',
+   opts:[
+     {en:'30 days',cn:'30天'},
+     {en:'60 days',cn:'60天'},
+     {en:'No waiting period',cn:'无等待期'},
+     {en:'90 days',cn:'90天'}
+   ],ans:1,
+   expEn:'Early and Intermediate Stage conditions have a 60-day waiting period.',
+   expCn:'早期和中期阶段病症的等待期为60天。'},
+
+  {cat:'Waiting & Survival 等待期与存活期',catColor:'#991B1B',catTxt:'#fff',
+   en:'What is the survival period required for Early and Intermediate Stage diagnoses?',
+   cn:'早期和中期确诊所需的存活期是多少天？',
+   opts:[
+     {en:'No survival period',cn:'无存活期'},
+     {en:'3 days',cn:'3天'},
+     {en:'7 days',cn:'7天'},
+     {en:'14 days',cn:'14天'}
+   ],ans:2,
+   expEn:'Early and Intermediate Stage diagnoses require a 7-day survival period (excluding Admission Events).',
+   expCn:'早期和中期确诊需要存活7天（入院事件除外）。'},
+
+  {cat:'Waiting & Survival 等待期与存活期',catColor:'#991B1B',catTxt:'#fff',
+   en:'What is the survival period for Advanced Stage, Diabetic Related, and Admission Events?',
+   cn:'晚期、糖尿病相关及入院事件的存活期是多少天？',
+   opts:[
+     {en:'7 days',cn:'7天'},
+     {en:'14 days',cn:'14天'},
+     {en:'30 days',cn:'30天'},
+     {en:'No survival period',cn:'无存活期'}
+   ],ans:1,
+   expEn:'Advanced Stage, Diabetic Related Conditions, and Admission Events require a 14-day survival period (Admission Events counted from first day of admission).',
+   expCn:'晚期、糖尿病相关病症及入院事件需要存活14天（入院事件从入院第一天起计算）。'},
+
+  {cat:'Waiting & Survival 等待期与存活期',catColor:'#991B1B',catTxt:'#fff',
+   en:'What is the survival period for Mental Illness Related Conditions?',
+   cn:'精神疾病相关病症的存活期是多少？',
+   opts:[
+     {en:'7 days',cn:'7天'},
+     {en:'14 days',cn:'14天'},
+     {en:'30 days',cn:'30天'},
+     {en:'No survival period required',cn:'无存活期要求'}
+   ],ans:3,
+   expEn:'There is NO survival period for Mental Illness Related Conditions — a unique feature that recognises the severity of these diagnoses.',
+   expCn:'精神疾病相关病症无存活期要求——这是承认此类诊断严重性的独特保障特点。'},
+
+  {cat:'Entry & Face Amount 投保资格与保额',catColor:'#1E40AF',catTxt:'#fff',
+   en:'What is the minimum entry age for MultiCI Enrich?',
+   cn:'多重危疾增益的最低投保年龄是多少？',
+   opts:[
+     {en:'1 year old',cn:'1岁'},
+     {en:'14 days old',cn:'14天'},
+     {en:'6 months old',cn:'6个月'},
+     {en:'18 years old',cn:'18岁'}
+   ],ans:1,
+   expEn:'The minimum entry age is 14 days (next birthday). This makes it suitable for covering infants.',
+   expCn:'最低投保年龄为14天（下一个生日）。这使其适合为婴儿提供保障。'},
+
+  {cat:'Entry & Face Amount 投保资格与保额',catColor:'#1E40AF',catTxt:'#fff',
+   en:'What is the maximum entry age for MultiCI Enrich?',
+   cn:'多重危疾增益的最高投保年龄是多少？',
+   opts:[
+     {en:'60 years',cn:'60岁'},
+     {en:'65 years',cn:'65岁'},
+     {en:'70 years',cn:'70岁'},
+     {en:'75 years',cn:'75岁'}
+   ],ans:2,
+   expEn:'The maximum entry age is 70 years (next birthday) for standard coverage.',
+   expCn:'标准保障的最高投保年龄为70岁（下一个生日）。'},
+
+  {cat:'Entry & Face Amount 投保资格与保额',catColor:'#1E40AF',catTxt:'#fff',
+   en:'What is the minimum Face Amount for MultiCI Enrich?',
+   cn:'多重危疾增益的最低保额是多少？',
+   opts:[
+     {en:'RM 50,000',cn:'RM 50,000'},
+     {en:'RM 80,000',cn:'RM 80,000'},
+     {en:'RM 100,000',cn:'RM 100,000'},
+     {en:'RM 150,000',cn:'RM 150,000'}
+   ],ans:1,
+   expEn:'The minimum Face Amount is RM80,000 per policy.',
+   expCn:'每份保单的最低保额为RM80,000。'},
+
+  {cat:'Entry & Face Amount 投保资格与保额',catColor:'#1E40AF',catTxt:'#fff',
+   en:'What is the maximum Face Amount for a standard MultiCI Enrich policy?',
+   cn:'标准多重危疾增益保单的最高保额是多少？',
+   opts:[
+     {en:'RM 1,000,000',cn:'RM 1,000,000'},
+     {en:'RM 1,500,000',cn:'RM 1,500,000'},
+     {en:'RM 2,000,000',cn:'RM 2,000,000'},
+     {en:'RM 5,000,000',cn:'RM 5,000,000'}
+   ],ans:1,
+   expEn:'The maximum Face Amount per standard policy is RM1,500,000. The overall per-life benefit limit is RM5,000,000.',
+   expCn:'标准保单每份的最高保额为RM1,500,000。每人的总体保障上限为RM5,000,000。'},
+
+  {cat:'Entry & Face Amount 投保资格与保额',catColor:'#1E40AF',catTxt:'#fff',
+   en:'What is the overall benefit limit per adult life across all Manulife MultiCI Enrich policies?',
+   cn:'成人每人在所有宏利多重危疾增益保单的整体保障上限是多少？',
+   opts:[
+     {en:'RM 1,500,000',cn:'RM 1,500,000'},
+     {en:'RM 2,000,000',cn:'RM 2,000,000'},
+     {en:'RM 5,000,000',cn:'RM 5,000,000'},
+     {en:'RM 10,000,000',cn:'RM 10,000,000'}
+   ],ans:2,
+   expEn:'The overall benefit limit per adult life is RM5,000,000 across all MultiCI Enrich policies combined.',
+   expCn:'成人每人在所有多重危疾增益保单的整体保障上限为RM5,000,000。'},
+
+  {cat:'Entry & Face Amount 投保资格与保额',catColor:'#1E40AF',catTxt:'#fff',
+   en:'What is the overall benefit limit per juvenile life?',
+   cn:'青少年每人的整体保障上限是多少？',
+   opts:[
+     {en:'RM 1,000,000',cn:'RM 1,000,000'},
+     {en:'RM 2,000,000',cn:'RM 2,000,000'},
+     {en:'RM 5,000,000',cn:'RM 5,000,000'},
+     {en:'Same as adult at RM5,000,000',cn:'与成人相同，为RM5,000,000'}
+   ],ans:1,
+   expEn:'The overall benefit limit per juvenile life is RM2,000,000 (lower than the RM5,000,000 adult limit).',
+   expCn:'青少年每人的整体保障上限为RM2,000,000（低于成人的RM5,000,000上限）。'},
+
+  {cat:'Prenatal & Juvenile 产前与青少年',catColor:'#7C3AED',catTxt:'#fff',
+   en:'From what gestational age can prenatal coverage begin under MultiCI Enrich?',
+   cn:'多重危疾增益的产前保障可从妊娠多少周开始？',
+   opts:[
+     {en:'8 weeks gestation',cn:'妊娠8周'},
+     {en:'13 weeks gestation',cn:'妊娠13周'},
+     {en:'20 weeks gestation',cn:'妊娠20周'},
+     {en:'28 weeks gestation',cn:'妊娠28周'}
+   ],ans:1,
+   expEn:'Prenatal coverage can begin from 13 weeks of gestation.',
+   expCn:'产前保障可从妊娠13周开始。'},
+
+  {cat:'Prenatal & Juvenile 产前与青少年',catColor:'#7C3AED',catTxt:'#fff',
+   en:'Up to what gestational week can prenatal coverage be applied for?',
+   cn:'产前保障最迟可在妊娠多少周时申请？',
+   opts:[
+     {en:'28 weeks',cn:'28周'},
+     {en:'32 weeks',cn:'32周'},
+     {en:'35 weeks',cn:'35周'},
+     {en:'40 weeks',cn:'40周'}
+   ],ans:2,
+   expEn:'Prenatal coverage can be applied up to 35 weeks of gestation.',
+   expCn:'产前保障可在妊娠35周前申请。'},
+
+  {cat:'Prenatal & Juvenile 产前与青少年',catColor:'#7C3AED',catTxt:'#fff',
+   en:'What is the maximum Face Amount for prenatal (baby) coverage?',
+   cn:'产前（婴儿）保障的最高保额是多少？',
+   opts:[
+     {en:'RM 100,000',cn:'RM 100,000'},
+     {en:'RM 150,000',cn:'RM 150,000'},
+     {en:'RM 250,000',cn:'RM 250,000'},
+     {en:'RM 500,000',cn:'RM 500,000'}
+   ],ans:2,
+   expEn:'The maximum Face Amount for prenatal (baby) coverage is RM250,000 per policy.',
+   expCn:'产前（婴儿）保障的最高保额为每份保单RM250,000。'},
+
+  {cat:'Prenatal & Juvenile 产前与青少年',catColor:'#7C3AED',catTxt:'#fff',
+   en:'For a covered baby aged ANB 2 years, what percentage of the benefit is payable (juvenile lien)?',
+   cn:'对于年龄为ANB 2岁的被保障婴儿，可赔付保障金额的百分之多少（青少年比例赔付）？',
+   opts:[
+     {en:'20%',cn:'20%'},
+     {en:'40%',cn:'40%'},
+     {en:'70%',cn:'70%'},
+     {en:'100%',cn:'100%'}
+   ],ans:1,
+   expEn:'Under the juvenile lien: ANB 1yr = 20%, ANB 2yr = 40%, ANB 3yr = 70%, ANB 4yr+ = 100%.',
+   expCn:'青少年比例赔付：ANB 1岁 = 20%，ANB 2岁 = 40%，ANB 3岁 = 70%，ANB 4岁+ = 100%。'},
+
+  {cat:'Prenatal & Juvenile 产前与青少年',catColor:'#7C3AED',catTxt:'#fff',
+   en:'At what age does the juvenile lien fully vest (i.e., 100% payable)?',
+   cn:'青少年比例赔付在多少岁时完全归属（即100%可赔付）？',
+   opts:[
+     {en:'ANB 3 years and above',cn:'ANB 3岁及以上'},
+     {en:'ANB 4 years and above',cn:'ANB 4岁及以上'},
+     {en:'ANB 5 years and above',cn:'ANB 5岁及以上'},
+     {en:'ANB 10 years and above',cn:'ANB 10岁及以上'}
+   ],ans:1,
+   expEn:'From ANB 4 years onwards, the full 100% benefit is payable — the juvenile lien no longer applies.',
+   expCn:'从ANB 4岁起，可支付全额100%保障——青少年比例赔付不再适用。'},
+
+  {cat:'Special Benefits 特别保障',catColor:'#065F46',catTxt:'#fff',
+   en:'What does the MCED Test benefit cover?',
+   cn:'MCED检测保障涵盖什么？',
+   opts:[
+     {en:'MRI and CT scan costs',cn:'MRI及CT扫描费用'},
+     {en:'Multi-Cancer Early Detection blood test reimbursement',cn:'多癌症早期检测血液检测报销'},
+     {en:'Chemotherapy costs',cn:'化疗费用'},
+     {en:'Annual full-body health screening',cn:'年度全身健康检查'}
+   ],ans:1,
+   expEn:'The MCED benefit reimburses the cost of a Multi-Cancer Early Detection blood test using genomic technology to detect multiple cancers early.',
+   expCn:'MCED保障报销利用基因组技术早期检测多种癌症的多癌症早期检测血液检测费用。'},
+
+  {cat:'Special Benefits 特别保障',catColor:'#065F46',catTxt:'#fff',
+   en:'How often can the MCED Test benefit be claimed, and what is the maximum per claim?',
+   cn:'MCED检测保障可多久申请一次，每次最高赔付多少？',
+   opts:[
+     {en:'Once only; max RM10,000',cn:'仅一次；最高RM10,000'},
+     {en:'Every 3 years; max RM5,000',cn:'每3年；最高RM5,000'},
+     {en:'Every 5 years; 5% of FA up to RM10,000',cn:'每5年；保额5%，最高RM10,000'},
+     {en:'Annually; max RM2,000',cn:'每年；最高RM2,000'}
+   ],ans:2,
+   expEn:'The MCED Test can be claimed every 5 years; the benefit is 5% of face amount per claim, capped at RM10,000.',
+   expCn:'MCED检测每5年可申请一次；每次赔付保额的5%，上限为RM10,000。'},
+
+  {cat:'Special Benefits 特别保障',catColor:'#065F46',catTxt:'#fff',
+   en:'How many mental illness conditions are covered under MultiCI Enrich?',
+   cn:'多重危疾增益涵盖多少种精神疾病？',
+   opts:[
+     {en:'2 conditions',cn:'2种'},
+     {en:'3 conditions',cn:'3种'},
+     {en:'5 conditions',cn:'5种'},
+     {en:'10 conditions',cn:'10种'}
+   ],ans:2,
+   expEn:'5 mental illness conditions are covered: Severe Major Depressive Disorder, Bipolar Disorder I, Severe OCD, Schizophrenia, and Schizoaffective Disorder.',
+   expCn:'涵盖5种精神疾病：严重重度抑郁症、双相情感障碍I型、严重强迫症、精神分裂症及分裂情感性障碍。'},
+
+  {cat:'Special Benefits 特别保障',catColor:'#065F46',catTxt:'#fff',
+   en:'What is the payout for the Mental Illness Special Benefit and what is the lifetime cap?',
+   cn:'精神疾病特别保障的赔付金额及终身上限是多少？',
+   opts:[
+     {en:'10% of FA; max RM50,000',cn:'保额10%；最高RM50,000'},
+     {en:'20% of FA; max RM150,000',cn:'保额20%；最高RM150,000'},
+     {en:'50% of FA; max RM300,000',cn:'保额50%；最高RM300,000'},
+     {en:'100% of FA; max RM500,000',cn:'保额100%；最高RM500,000'}
+   ],ans:1,
+   expEn:'The Mental Illness Special Benefit pays 20% of face amount, maximum RM150,000 per person, payable once.',
+   expCn:'精神疾病特别保障赔付保额的20%，每人最高RM150,000，仅可申请一次。'},
+
+  {cat:'Special Benefits 特别保障',catColor:'#065F46',catTxt:'#fff',
+   en:'What is the payout for the Diabetic Special Benefit?',
+   cn:'糖尿病特别保障的赔付金额是多少？',
+   opts:[
+     {en:'10% of FA; max RM75,000',cn:'保额10%；最高RM75,000'},
+     {en:'15% of FA; max RM100,000',cn:'保额15%；最高RM100,000'},
+     {en:'20% of FA; max RM150,000',cn:'保额20%；最高RM150,000'},
+     {en:'25% of FA; max RM200,000',cn:'保额25%；最高RM200,000'}
+   ],ans:2,
+   expEn:'The Diabetic Special Benefit pays 20% of face amount, maximum RM150,000 per person, payable once.',
+   expCn:'糖尿病特别保障赔付保额的20%，每人最高RM150,000，仅可申请一次。'},
+
+  {cat:'Special Benefits 特别保障',catColor:'#065F46',catTxt:'#fff',
+   en:'How does the Caregiver Support Benefit work for Alzheimer\'s Disease?',
+   cn:'阿尔茨海默症的护理人员支援保障如何运作？',
+   opts:[
+     {en:'Lump sum of 20% FA payable once',cn:'一次性赔付保额的20%'},
+     {en:'5% FA per year for up to 5 years; max RM10,000 per year',cn:'每年赔付保额5%，最长5年；每年最高RM10,000'},
+     {en:'100% FA paid after diagnosis',cn:'确诊后支付全额保额的100%'},
+     {en:'10% FA every 3 years',cn:'每3年赔付保额的10%'}
+   ],ans:1,
+   expEn:'For Advanced Alzheimer\'s Disease, the plan pays 5% of FA per year (up to RM10,000/year) for up to 5 consecutive policy years.',
+   expCn:'对于晚期阿尔茨海默症，保单每年支付保额的5%（每年最高RM10,000），最多连续5个保单年度。'},
+
+  {cat:'Special Benefits 特别保障',catColor:'#065F46',catTxt:'#fff',
+   en:'At what age do Special Benefits (Diabetic, Mental Illness, MCED, Caregiver) expire?',
+   cn:'特别保障利益（糖尿病、精神疾病、MCED、护理人员支援）在多少岁届满？',
+   opts:[
+     {en:'Age 70',cn:'70岁'},
+     {en:'Age 75',cn:'75岁'},
+     {en:'Age 80',cn:'80岁'},
+     {en:'Age 99',cn:'99岁'}
+   ],ans:2,
+   expEn:'All Special Benefits including Diabetic, Mental Illness, MCED Test, Pharmacogenomics, and Caregiver Support expire at age 80.',
+   expCn:'所有特别保障利益，包括糖尿病、精神疾病、MCED检测、药物基因组学检测及护理人员支援，均在80岁届满。'},
+
+  {cat:'Double Protection 双重保障',catColor:'#0D2240',catTxt:'#fff',
+   en:'What is the Double Protection Benefit?',
+   cn:'什么是双重保障利益？',
+   opts:[
+     {en:'A second basic plan attached for free',cn:'免费附加的第二份基本计划'},
+     {en:'An additional claim for a 2nd Cancer, 2nd Heart Attack, or 2nd Stroke at a different site',cn:'针对不同部位发生的第二次癌症、心脏病发或中风的额外理赔'},
+     {en:'Double payout if hospitalised for more than 30 days',cn:'住院超过30天时双倍赔付'},
+     {en:'Two family members covered under one policy',cn:'一份保单保障两位家庭成员'}
+   ],ans:1,
+   expEn:'The Double Protection Benefit allows an additional claim for a second occurrence of Cancer, Heart Attack, or Stroke — provided it is medically independent and at a different anatomical site.',
+   expCn:'双重保障利益允许针对第二次发生的癌症、心脏病发或中风额外申请理赔——前提是在医学上独立且发生在不同的解剖部位。'},
+
+  {cat:'Double Protection 双重保障',catColor:'#0D2240',catTxt:'#fff',
+   en:'When does the Double Protection Benefit expire?',
+   cn:'双重保障利益何时届满？',
+   opts:[
+     {en:'When the first claim is made',cn:'第一次理赔后'},
+     {en:'At age 70',cn:'70岁时'},
+     {en:'At age 80',cn:'80岁时'},
+     {en:'At the end of coverage term (age 99)',cn:'保障期满（99岁）时'}
+   ],ans:2,
+   expEn:'The Double Protection Benefit expires at age 80 (next birthday). It is one of several benefits that expire at this age.',
+   expCn:'双重保障利益在80岁（下一个生日）届满，是几个在此年龄届满的保障利益之一。'},
+
+  {cat:'Policy Details 保单详情',catColor:'#1E40AF',catTxt:'#fff',
+   en:'What is the free-look period for MultiCI Enrich?',
+   cn:'多重危疾增益的免费审阅期是多少天？',
+   opts:[
+     {en:'7 days',cn:'7天'},
+     {en:'10 days',cn:'10天'},
+     {en:'15 days',cn:'15天'},
+     {en:'30 days',cn:'30天'}
+   ],ans:2,
+   expEn:'The free-look period is 15 days from the date of receipt of the policy.',
+   expCn:'自收到保单之日起有15天的免费审阅期。'},
+
+  {cat:'Policy Details 保单详情',catColor:'#1E40AF',catTxt:'#fff',
+   en:'Within how many years can a lapsed policy be reinstated?',
+   cn:'失效保单可在多少年内复效？',
+   opts:[
+     {en:'1 year',cn:'1年'},
+     {en:'2 years',cn:'2年'},
+     {en:'3 years',cn:'3年'},
+     {en:'5 years',cn:'5年'}
+   ],ans:2,
+   expEn:'A lapsed policy can be reinstated within 3 years of lapse, subject to conditions.',
+   expCn:'失效保单可在失效后3年内复效，须符合相关条件。'},
+
+  {cat:'Policy Details 保单详情',catColor:'#1E40AF',catTxt:'#fff',
+   en:'Is MultiCI Enrich eligible for tax relief in Malaysia?',
+   cn:'多重危疾增益在马来西亚是否享有税务减免？',
+   opts:[
+     {en:'No, CI riders are not eligible for tax relief',cn:'不，危疾附加险不享有税务减免'},
+     {en:'Yes, under the Education or Medical Benefit category',cn:'是的，属于教育或医疗保障类别'},
+     {en:'Yes, but only for policyholders above age 60',cn:'是的，但仅适用于60岁以上的保单持有人'},
+     {en:'Yes, under the Life Insurance category only',cn:'是的，但仅属于寿险类别'}
+   ],ans:1,
+   expEn:'Premiums for MultiCI Enrich qualify for tax relief under Malaysia\'s Education or Medical Benefit category, subject to LHDN approval.',
+   expCn:'多重危疾增益的保费符合马来西亚教育或医疗保障类别的税务减免资格，须经LHDN批准。'},
+
+  {cat:'Policy Details 保单详情',catColor:'#1E40AF',catTxt:'#fff',
+   en:'What happens to the Face Amount if you make a claim under MultiCI Enrich?',
+   cn:'在多重危疾增益下申请理赔后，保额会发生什么变化？',
+   opts:[
+     {en:'Face amount reduces by the claim amount',cn:'保额减少理赔金额'},
+     {en:'Face amount is unaffected — benefit is paid on top',cn:'保额不受影响——保障额外支付'},
+     {en:'The entire policy terminates after the first claim',cn:'第一次理赔后整份保单终止'},
+     {en:'Face amount reduces by 50% after each claim',cn:'每次理赔后保额减少50%'}
+   ],ans:1,
+   expEn:'As a non-accelerated rider, MultiCI Enrich benefits do not reduce the face amount of the basic plan — claims are paid on top.',
+   expCn:'作为非加速型附加险，多重危疾增益的赔付不会减少基本计划的保额——理赔在保额之上额外支付。'},
+
+  {cat:'Policy Details 保单详情',catColor:'#1E40AF',catTxt:'#fff',
+   en:'How is the insurance charge for MultiCI Enrich deducted?',
+   cn:'多重危疾增益的保险费如何扣除？',
+   opts:[
+     {en:'Monthly by cash / cheque payment',cn:'每月以现金或支票支付'},
+     {en:'Monthly by cancelling units from the investment-linked account',cn:'每月通过注销投资连结账户的单位来扣除'},
+     {en:'Annually as a lump sum',cn:'每年一次性支付'},
+     {en:'Only deducted when a claim is made',cn:'仅在理赔时扣除'}
+   ],ans:1,
+   expEn:'The insurance charge is deducted monthly by cancelling sufficient units from the investment-linked account at the Net Asset Value.',
+   expCn:'保险费每月通过在净资产值下从投资连结账户中注销足够单位来扣除。'},
+
+  {cat:'Exclusions 除外责任',catColor:'#991B1B',catTxt:'#fff',
+   en:'Which of the following is NOT covered under MultiCI Enrich?',
+   cn:'以下哪项不受多重危疾增益保障？',
+   opts:[
+     {en:'Cancer diagnosed after the waiting period',cn:'等待期后确诊的癌症'},
+     {en:'Pre-existing conditions at the time of application',cn:'申请时的既往病症'},
+     {en:'Mental illness diagnosed after 180 days of medication',cn:'经180天药物治疗后确诊的精神疾病'},
+     {en:'Diabetic nephropathy resulting in kidney failure',cn:'导致肾衰竭的糖尿病肾病'}
+   ],ans:1,
+   expEn:'Pre-existing conditions at the time of application are excluded from coverage under MultiCI Enrich.',
+   expCn:'申请时的既往病症被排除在多重危疾增益的保障范围之外。'},
+
+  {cat:'Exclusions 除外责任',catColor:'#991B1B',catTxt:'#fff',
+   en:'Is self-inflicted injury or suicide covered under MultiCI Enrich?',
+   cn:'多重危疾增益是否保障自伤或自杀？',
+   opts:[
+     {en:'Yes, if hospitalised for more than 3 days',cn:'是的，如住院超过3天'},
+     {en:'Yes, but only in the first 2 years',cn:'是的，但仅在首2年内'},
+     {en:'No — it is an exclusion',cn:'不——属于除外责任'},
+     {en:'Yes, it is fully covered',cn:'是的，完全保障'}
+   ],ans:2,
+   expEn:'Self-inflicted injuries and suicide are explicitly excluded from coverage under MultiCI Enrich.',
+   expCn:'自伤和自杀明确排除在多重危疾增益的保障范围之外。'},
+
+  {cat:'Exclusions 除外责任',catColor:'#991B1B',catTxt:'#fff',
+   en:'Are claims arising from war or terrorist activities covered?',
+   cn:'由战争或恐怖活动引起的理赔是否受保障？',
+   opts:[
+     {en:'Yes, if the insured is a civilian',cn:'是的，如被保险人是平民'},
+     {en:'No — war and terrorist activities are excluded',cn:'不——战争和恐怖活动属于除外责任'},
+     {en:'Yes, if the insured is outside Malaysia',cn:'是的，如被保险人在马来西亚境外'},
+     {en:'Yes, but only for Advanced Stage conditions',cn:'是的，但仅限于晚期病症'}
+   ],ans:1,
+   expEn:'Claims arising from war or terrorist activities are excluded from coverage under MultiCI Enrich.',
+   expCn:'由战争或恐怖活动引起的理赔被排除在多重危疾增益的保障范围之外。'},
+
+  {cat:'Key Numbers 关键数字',catColor:'#065F46',catTxt:'#fff',
+   en:'How many claim stages are there under MultiCI Enrich?',
+   cn:'多重危疾增益共有多少个理赔阶段？',
+   opts:[
+     {en:'1 stage (Advanced only)',cn:'1个阶段（仅晚期）'},
+     {en:'2 stages (Early and Advanced)',cn:'2个阶段（早期和晚期）'},
+     {en:'3 stages (Early, Intermediate, Advanced)',cn:'3个阶段（早期、中期、晚期）'},
+     {en:'4 stages (Early, Intermediate, Advanced, Terminal)',cn:'4个阶段（早期、中期、晚期、末期）'}
+   ],ans:2,
+   expEn:'MultiCI Enrich has 3 claim stages: Early Stage, Intermediate Stage, and Advanced Stage.',
+   expCn:'多重危疾增益有3个理赔阶段：早期阶段、中期阶段和晚期阶段。'},
+
+  {cat:'Key Numbers 关键数字',catColor:'#065F46',catTxt:'#fff',
+   en:'What is the maximum Face Amount for prenatal baby coverage, and the entry age range?',
+   cn:'产前婴儿保障的最高保额及投保周数范围是多少？',
+   opts:[
+     {en:'RM 100,000; 8–30 weeks',cn:'RM 100,000；8至30周'},
+     {en:'RM 250,000; 13–35 weeks',cn:'RM 250,000；13至35周'},
+     {en:'RM 500,000; 10–36 weeks',cn:'RM 500,000；10至36周'},
+     {en:'RM 1,500,000; 12–40 weeks',cn:'RM 1,500,000；12至40周'}
+   ],ans:1,
+   expEn:'Prenatal baby coverage: max FA is RM250,000, available from 13 to 35 weeks of gestation.',
+   expCn:'产前婴儿保障：最高保额为RM250,000，可在妊娠13至35周之间投保。'},
+
+  {cat:'Key Numbers 关键数字',catColor:'#065F46',catTxt:'#fff',
+   en:'What is the minimum documentation requirement for a Mental Illness claim (medication period)?',
+   cn:'精神疾病理赔的最低记录要求（药物治疗期限）是多少？',
+   opts:[
+     {en:'30 days of documented medication',cn:'有记录的30天药物治疗'},
+     {en:'90 days of documented medication',cn:'有记录的90天药物治疗'},
+     {en:'180 days of documented medication',cn:'有记录的180天药物治疗'},
+     {en:'365 days of documented medication',cn:'有记录的365天药物治疗'}
+   ],ans:2,
+   expEn:'Mental illness claims require documented medication treatment of at least 180 days, along with a confirmed psychiatric diagnosis per DSM-5 criteria.',
+   expCn:'精神疾病理赔需要至少180天有记录的药物治疗，以及根据DSM-5标准确认的精神科诊断。'},
+
+  {cat:'Key Numbers 关键数字',catColor:'#065F46',catTxt:'#fff',
+   en:'What is the per-claim cap for an Admission Event at Early or Intermediate Stage?',
+   cn:'早期或中期阶段入院事件的每次赔付上限是多少？',
+   opts:[
+     {en:'RM 50,000',cn:'RM 50,000'},
+     {en:'RM 100,000',cn:'RM 100,000'},
+     {en:'RM 125,000',cn:'RM 125,000'},
+     {en:'RM 300,000',cn:'RM 300,000'}
+   ],ans:2,
+   expEn:'Admission Events at Early or Intermediate Stage are capped at RM125,000 per claim (vs RM300,000 for standard Early/Intermediate claims).',
+   expCn:'早期或中期阶段入院事件每次赔付上限为RM125,000（而非标准早/中期赔付上限RM300,000）。'},
+
+  {cat:'Key Numbers 关键数字',catColor:'#065F46',catTxt:'#fff',
+   en:'The Pharmacogenomics benefit is payable at what amount and how often?',
+   cn:'药物基因组学检测保障的赔付金额是多少，可申请多少次？',
+   opts:[
+     {en:'10% FA, max RM20,000, every 5 years',cn:'保额10%，最高RM20,000，每5年'},
+     {en:'5% FA, max RM10,000, once only',cn:'保额5%，最高RM10,000，仅一次'},
+     {en:'5% FA, max RM10,000, every 3 years',cn:'保额5%，最高RM10,000，每3年'},
+     {en:'20% FA, max RM50,000, once only',cn:'保额20%，最高RM50,000，仅一次'}
+   ],ans:1,
+   expEn:'The Pharmacogenomics benefit pays 5% of face amount (up to RM10,000) once only per lifetime, expiring at age 80.',
+   expCn:'药物基因组学检测保障赔付保额的5%（最高RM10,000），每人终身仅一次，80岁届满。'},
+
+  {cat:'Product Basics 产品基础',catColor:'#0D2240',catTxt:'#fff',
+   en:'What is the waiting period for the Diabetic Special Benefit?',
+   cn:'糖尿病特别保障的等待期是多少天？',
+   opts:[
+     {en:'30 days',cn:'30天'},
+     {en:'60 days',cn:'60天'},
+     {en:'No waiting period',cn:'无等待期'},
+     {en:'90 days',cn:'90天'}
+   ],ans:1,
+   expEn:'The Diabetic Special Benefit has a 60-day waiting period, same as Early and Intermediate Stage conditions.',
+   expCn:'糖尿病特别保障的等待期为60天，与早期和中期阶段病症相同。'},
+
+  {cat:'Claims & Payouts 理赔与赔付',catColor:'#00827F',catTxt:'#fff',
+   en:'Can a policyholder claim for both an Early Stage cancer AND later an Advanced Stage cancer on the same MultiCI Enrich policy?',
+   cn:'保单持有人是否可以在同一份多重危疾增益保单下，同时申请早期癌症理赔和之后的晚期癌症理赔？',
+   opts:[
+     {en:'No — only one claim per illness type',cn:'不——每种疾病类型只能理赔一次'},
+     {en:'Yes — different stages of the same illness are separately claimable',cn:'是——同一疾病的不同阶段可分别申请理赔'},
+     {en:'Only if more than 5 years apart',cn:'仅在两次相隔5年以上的情况下'},
+     {en:'Only the Advanced Stage claim is payable',cn:'仅晚期阶段理赔可支付'}
+   ],ans:1,
+   expEn:'Yes — MultiCI Enrich allows claims at Early, Intermediate, and Advanced stages of the same illness. Each stage is a separate claimable event.',
+   expCn:'是的——多重危疾增益允许对同一疾病的早期、中期和晚期分别申请理赔，每个阶段为独立的可理赔事件。'},
+
+  {cat:'Double Protection 双重保障',catColor:'#0D2240',catTxt:'#fff',
+   en:'A client previously claimed for breast cancer. They later develop lung cancer. Under Double Protection, is this claimable?',
+   cn:'客户之前曾因乳腺癌申请理赔，之后又患上肺癌。根据双重保障，此次是否可申请理赔？',
+   opts:[
+     {en:'No — cancer has already been claimed',cn:'不——癌症已经申请过理赔'},
+     {en:'Yes — a new, independent cancer at a different site qualifies',cn:'是——发生在不同部位的新发独立癌症符合条件'},
+     {en:'Only if 10 years have passed since the first claim',cn:'仅在第一次理赔后已过10年的情况下'},
+     {en:'Only if the client is under 60 years old',cn:'仅在客户60岁以下的情况下'}
+   ],ans:1,
+   expEn:'Under Double Protection, a second cancer at a different anatomical site (e.g., lung vs breast) qualifies as a new claimable event, as long as the client is under age 80.',
+   expCn:'根据双重保障，发生在不同解剖部位的第二次癌症（如肺癌与乳腺癌）符合新理赔事件的条件，前提是客户未满80岁。'},
+
+  {cat:'Product Basics 产品基础',catColor:'#0D2240',catTxt:'#fff',
+   en:'What notice period must Manulife give before revising the insurance charge?',
+   cn:'宏利在修改保险费之前必须提前多少天书面通知？',
+   opts:[
+     {en:'7 days',cn:'7天'},
+     {en:'14 days',cn:'14天'},
+     {en:'30 days',cn:'30天'},
+     {en:'60 days',cn:'60天'}
+   ],ans:2,
+   expEn:'Manulife must provide 30 days\' written notice before any revision to the insurance charge.',
+   expCn:'宏利必须在任何保险费调整前提前30天书面通知。'},
+
+  {cat:'Prenatal & Juvenile 产前与青少年',catColor:'#7C3AED',catTxt:'#fff',
+   en:'Under what two circumstances can the Covered Baby exercise the Conversion Privilege?',
+   cn:'被保障婴儿在哪两种情况下可行使转换特权？',
+   opts:[
+     {en:'Upon turning 18, or if the policy lapses',cn:'年满18岁时，或保单失效时'},
+     {en:'If the Covered Member dies, OR after the policy anniversary when the baby is age 2–18',cn:'若被保障成员去世，或在婴儿年龄2至18岁之间的保单周年日后'},
+     {en:'After 5 policy years, or upon graduation from school',cn:'保单满5年后，或从学校毕业时'},
+     {en:'Only upon reaching age 21',cn:'仅在年满21岁时'}
+   ],ans:1,
+   expEn:'The Conversion Privilege applies: (1) if the Covered Member (parent) passes away, or (2) after the policy anniversary when the baby is between ages 2 and 18. Conversion must happen within 3 months.',
+   expCn:'转换特权适用于以下情况：（1）若被保障成员（父母）去世；或（2）在婴儿年龄2至18岁之间的保单周年日后。转换必须在3个月内完成。'},
+
+  {cat:'Exclusions 除外责任',catColor:'#991B1B',catTxt:'#fff',
+   en:'If a prospect has HIV, can they generally be covered under MultiCI Enrich?',
+   cn:'如果准客户是HIV阳性，他们通常是否可以投保多重危疾增益？',
+   opts:[
+     {en:'Yes, without any restriction',cn:'是的，没有任何限制'},
+     {en:'No — HIV-positive individuals are generally excluded except for accidental blood transfusion cases',cn:'不——HIV阳性人士通常不在保障范围内，因意外输血引起的情况除外'},
+     {en:'Yes, but only Early Stage conditions are covered',cn:'是的，但只保障早期病症'},
+     {en:'Yes, with a loading of 50%',cn:'是的，但需加收50%附加费'}
+   ],ans:1,
+   expEn:'HIV-positive individuals are generally excluded from coverage. The only exception is for claims arising from accidental blood transfusion.',
+   expCn:'HIV阳性人士通常不在保障范围内。唯一例外是因意外输血而引起的理赔。'},
+
+  {cat:'Key Numbers 关键数字',catColor:'#065F46',catTxt:'#fff',
+   en:'How many of the 5 mental illness conditions have no survival period?',
+   cn:'5种精神疾病中有多少种无存活期要求？',
+   opts:[
+     {en:'None — all 5 have a 7-day survival period',cn:'无——所有5种均有7天存活期'},
+     {en:'Only 1 (Schizophrenia)',cn:'仅1种（精神分裂症）'},
+     {en:'All 5 mental illness conditions have no survival period',cn:'所有5种精神疾病均无存活期要求'},
+     {en:'Only 3 of the 5',cn:'5种中仅3种'}
+   ],ans:2,
+   expEn:'All 5 Mental Illness Related Conditions have NO survival period — this is unique among all covered conditions under MultiCI Enrich.',
+   expCn:'所有5种精神疾病相关病症均无存活期要求——这是多重危疾增益所有保障病症中的独特规定。'},
+];
+
+var state = {
+  current: 0, score: 0, answers: [],
+  shuffled: []
+};
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function toggleLang() {
+  lang = lang === 'en' ? 'cn' : 'en';
+  document.getElementById('langToggle').textContent = lang === 'en' ? '中文' : 'EN';
+  if (document.getElementById('quizScreen').classList.contains('active')) {
+    renderQuestion();
+  }
+}
+
+function startQuiz() {
+  state.shuffled = shuffle(questions);
+  state.current = 0; state.score = 0; state.answers = [];
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+function renderQuestion() {
+  var q = state.shuffled[state.current];
+  var total = state.shuffled.length;
+
+  document.getElementById('qCounter').textContent = (lang === 'en' ? 'Question ' : '第') + (state.current + 1) + (lang === 'en' ? ' / ' + total : ' / ' + total + ' 题');
+  document.getElementById('scoreLive').textContent = (lang === 'en' ? 'Score: ' : '得分：') + state.score;
+  document.getElementById('progressFill').style.width = (((state.current + 1) / total) * 100) + '%';
+
+  var tag = document.getElementById('catTag');
+  tag.textContent = q.cat;
+  tag.style.background = q.catColor + '22';
+  tag.style.color = q.catColor;
+  tag.style.border = '1px solid ' + q.catColor + '44';
+
+  document.getElementById('qTextEn').textContent = q.en;
+  document.getElementById('qTextCn').textContent = q.cn;
+
+  var wrap = document.getElementById('optionsWrap');
+  wrap.innerHTML = '';
+  q.opts.forEach(function(opt, i) {
+    var div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = '<div class="opt-en">' + opt.en + '</div><div class="opt-cn">' + opt.cn + '</div>';
+    div.onclick = function() { selectAnswer(i); };
+    wrap.appendChild(div);
+  });
+
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('btnNext').style.display = 'none';
+}
+
+function selectAnswer(chosen) {
+  var opts = document.querySelectorAll('.opt');
+  if (opts[0].classList.contains('answered')) return;
+  opts.forEach(function(o) { o.classList.add('answered'); o.onclick = null; });
+
+  var q = state.shuffled[state.current];
+  var correct = q.ans;
+  var isRight = chosen === correct;
+
+  if (isRight) state.score++;
+  state.answers.push({ q: q, chosen: chosen, correct: correct, isRight: isRight });
+
+  opts[chosen].classList.add(isRight ? 'correct' : 'wrong');
+  if (!isRight) opts[correct].classList.add('show-correct');
+
+  var fb = document.getElementById('feedback');
+  fb.style.display = 'block';
+  fb.className = 'feedback ' + (isRight ? 'correct-fb' : 'wrong-fb');
+  fb.innerHTML = '<div class="feedback-head">' +
+    (isRight ? (lang === 'en' ? 'Correct!' : '答对了！') : (lang === 'en' ? 'Not quite.' : '答错了。')) +
+    '</div><div class="feedback-exp">' + q.expEn + '</div>' +
+    '<div class="feedback-cn">' + q.expCn + '</div>';
+
+  var btn = document.getElementById('btnNext');
+  btn.style.display = 'block';
+  var isLast = state.current >= state.shuffled.length - 1;
+  btn.textContent = isLast ? (lang === 'en' ? 'See Results' : '查看结果') : (lang === 'en' ? 'Next Question →' : '下一题 →');
+}
+
+function nextQ() {
+  if (state.current >= state.shuffled.length - 1) {
+    showResults();
+  } else {
+    state.current++;
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  var total = state.shuffled.length;
+  var pct = Math.round((state.score / total) * 100);
+
+  var grade, emoji;
+  if (pct >= 90) { grade = lang === 'en' ? 'Outstanding! You\'re a MultiCI Enrich Expert!' : '优秀！您是多重危疾增益专家！'; emoji = '🏆'; }
+  else if (pct >= 75) { grade = lang === 'en' ? 'Great work! Well above average.' : '非常好！远高于平均水平。'; emoji = '🌟'; }
+  else if (pct >= 60) { grade = lang === 'en' ? 'Good effort! A bit more revision needed.' : '不错的努力！还需要多复习。'; emoji = '👍'; }
+  else if (pct >= 40) { grade = lang === 'en' ? 'Keep studying — you\'re getting there!' : '继续学习——您正在进步！'; emoji = '📚'; }
+  else { grade = lang === 'en' ? 'Review the materials and try again!' : '复习材料后再试一次！'; emoji = '💪'; }
+
+  document.getElementById('rEmoji').textContent = emoji;
+  document.getElementById('rScore').textContent = state.score;
+  document.getElementById('rDenom').textContent = '/ ' + total;
+  document.getElementById('rGrade').textContent = grade;
+  document.getElementById('rSub').textContent = pct + '% ' + (lang === 'en' ? 'correct' : '正确率');
+  document.getElementById('rCorrect').textContent = state.score;
+  document.getElementById('rWrong').textContent = total - state.score;
+  document.getElementById('rPct').textContent = pct + '%';
+
+  var list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  state.answers.forEach(function(a, i) {
+    var item = document.createElement('div');
+    item.className = 'review-item';
+    item.innerHTML =
+      '<div class="review-num">' + (lang === 'en' ? 'Question ' : '第') + (i + 1) + (lang === 'cn' ? ' 题' : '') + '</div>' +
+      '<div class="review-badge ' + (a.isRight ? 'badge-ok' : 'badge-no') + '">' +
+        (a.isRight ? (lang === 'en' ? '✓ Correct 答对' : '✓ 答对') : (lang === 'en' ? '✗ Incorrect 答错' : '✗ 答错')) +
+      '</div>' +
+      '<div class="review-q-en">' + a.q.en + '</div>' +
+      '<div class="review-q-cn">' + a.q.cn + '</div>' +
+      '<div class="review-ans-row">' +
+        '<span class="ans-label ' + (a.isRight ? 'correct-l' : 'wrong-l') + '">' + (lang === 'en' ? 'Your answer:' : '您的答案：') + '</span>' +
+        '<span>' + a.q.opts[a.chosen].en + '<br><span style="font-size:12px;color:var(--mgray)">' + a.q.opts[a.chosen].cn + '</span></span>' +
+      '</div>' +
+      (!a.isRight ?
+        '<div class="review-ans-row">' +
+          '<span class="ans-label right-l">' + (lang === 'en' ? 'Correct answer:' : '正确答案：') + '</span>' +
+          '<span>' + a.q.opts[a.correct].en + '<br><span style="font-size:12px;color:var(--mgray)">' + a.q.opts[a.correct].cn + '</span></span>' +
+        '</div>'
+      : '') +
+      '<div style="margin-top:8px;padding:10px 12px;background:var(--gray);border-radius:8px;font-size:12px;color:var(--mgray);line-height:1.55">' +
+        a.q.expEn + '<br><span style="color:#94a3b8">' + a.q.expCn + '</span>' +
+      '</div>';
+    list.appendChild(item);
+  });
+
+  showScreen('resultsScreen');
+  window.scrollTo(0, 0);
+}
+
+function restartQuiz() {
+  state.shuffled = shuffle(questions);
+  state.current = 0; state.score = 0; state.answers = [];
+  showScreen('quizScreen');
+  renderQuestion();
+}
+</script>
+</body>
+</html>
