@@ -1,0 +1,117 @@
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <title>Manulife Heritage 专家挑战赛</title>
+    <style>
+        /* 进阶彩色样式 */
+        :root { --primary: #00A764; --secondary: #007c5a; --bg: #f0f7f4; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #e0f2f1, #ffffff); min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { color: var(--primary); text-align: center; margin-bottom: 30px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        
+        /* 题目卡片动画 */
+        .question-card { background: white; padding: 25px; margin-bottom: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: transform 0.3s; border-left: 8px solid var(--primary); }
+        .question-card:hover { transform: translateY(-5px); }
+        
+        /* 选项按钮美化 */
+        .option { display: block; padding: 15px; margin: 10px 0; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .option:hover { background: #e8f5e9; border-color: var(--primary); }
+        input[type="radio"]:checked + span { color: var(--primary); font-weight: bold; }
+        
+        /* 进度条 */
+        #progress-bar { height: 8px; background: #ddd; border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+        #progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s; }
+        
+        button { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 50px; font-size: 20px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,167,100,0.3); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Manulife Heritage 挑战赛</h1>
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+    <div id="quiz-container"></div>
+    <button onclick="submitQuiz()">交卷！查看我的专家级别</button>
+    <div id="result" style="margin-top:20px;"></div>
+</div>
+
+<script>
+    // 放入你那 30 题的代码...
+const questions = [
+    { q: "1. Manulife Heritage 提供的保费缴付期选项不包括？", options: ["6年", "10年", "15年", "20年"], answer: 2, exp: "不提供15年选项。" },
+    { q: "2. 年缴模式下的最低基本保费（Insurance Premium）是多少？", options: ["RM 1,200", "RM 2,000", "RM 2,400", "RM 3,000"], answer: 2, exp: "最低为 RM 2,400。" },
+    { q: "3. 若保费缴付期为 6 年，保单持有人的最低投保年龄通常从多少开始？", options: ["0岁", "18岁", "25岁", "30岁"], answer: 0, exp: "通常支持 0 岁起投保。" },
+    { q: "4. 以下哪项不是 Manulife Heritage 的核心特征？", options: ["终身保障", "保额重置功能", "保证续保至100岁", "投资连结性质"], answer: 2, exp: "该产品非保证续保至100岁。" },
+    { q: "5. 当客户选择保费融资（Premium Financing）时，需符合什么要求？", options: ["个人信用评分", "特定的财务核保标准", "保单价值需超过50万", "无特殊要求"], answer: 1, exp: "需符合特定的财务核保标准。" },
+    { q: "6. Protection Booster 每连续多少个保单年度会自动增加保额？", options: ["5年", "10年", "15年", "20年"], answer: 1, exp: "每 10 个保单年度。" },
+    { q: "7. Protection Booster 增加的保额比例是多少？", options: ["2%", "5%", "10%", "15%"], answer: 1, exp: "基本保额的 5%。" },
+    { q: "8. 自然灾害导致的意外身故，额外赔付比例为？", options: ["100%", "200%", "300%", "400%"], answer: 3, exp: "最高档为 400%。" },
+    { q: "9. 公共交通意外身故的额外赔付比例为？", options: ["100%", "200%", "300%", "400%"], answer: 1, exp: "为 200%。" },
+    { q: "10. 海外意外身故的额外赔付比例为？", options: ["100%", "200%", "300%", "400%"], answer: 2, exp: "为 300%。" },
+    { q: "11. 什么是 Wellness Reward？", options: ["理赔奖励", "保费折扣", "满足特定体检要求后的奖励", "周年红利"], answer: 2, exp: "与健康管理/体检要求相关。" },
+    { q: "12. Loyalty Bonus 通常在第几个保单年度起开始发放？", options: ["第5年", "第10年", "第15年", "第20年"], answer: 1, exp: "通常为第 10 个保单年度起。" },
+    { q: "13. Maturity Bonus 会在什么时候给付？", options: ["保单周年日", "被保人身故时", "保单满期时", "部分提取时"], answer: 2, exp: "在保单满期时给付。" },
+    { q: "14. 若发生意外伤残（Accidental Disability），赔付基础是？", options: ["现金价值", "账户价值", "基本保额", "总保费"], answer: 2, exp: "基于基本保额。" },
+    { q: "15. 基本保额（Face Amount）增加的机制主要通过？", options: ["市场波动", "Protection Booster", "保费融资", "基金转换"], answer: 1, exp: "Protection Booster 是主要机制。" },
+    { q: "16. Cover Reset（保额重置）的前提条件之一是？", options: ["至少缴费5年", "无理赔记录", "年龄超过50岁", "投资收益率大于5%"], answer: 1, exp: "必须无理赔记录。" },
+    { q: "17. 申请 Cover Reset，距离上次部分提取需满足多少时间？", options: ["12个月", "23个月", "36个月", "48个月"], answer: 1, exp: "需满 23 个月。" },
+    { q: "18. 无失效保证（NLG）条款的核心作用是？", options: ["确保有理赔", "确保保单不会失效", "确保获得高额红利", "确保保费不涨价"], answer: 1, exp: "确保保单在特定条件下不因账户价值不足而失效。" },
+    { q: "19. 部分提取（Partial Withdrawal）是否会影响基本保额？", options: ["不会", "会，可能导致保额降低", "会，保额翻倍", "仅影响现金价值"], answer: 1, exp: "提取会扣减保额。" },
+    { q: "20. 什么是 Modal Factor？", options: ["保费频率系数", "年龄系数", "风险系数", "基金分配系数"], answer: 0, exp: "用于调整不同缴费频率的保费。" },
+    { q: "21. 如果客户想增加保额，可以在什么条件下进行？", options: ["随时可以", "特定窗口期且符合核保条件", "仅在保单满期前一年", "不可增加"], answer: 1, exp: "通常有特定窗口期及核保要求。" },
+    { q: "22. 账户价值与基本保额的关系是？", options: ["两者永远相等", "身故赔付取两者较高者", "账户价值必须大于保额", "两者无关"], answer: 1, exp: "身故赔付保障通常取两者较高者。" },
+    { q: "23. Advance Premium 的含义是？", options: ["预交保费", "逾期保费", "融资保费", "追加保费"], answer: 0, exp: "预先缴纳的保费。" },
+    { q: "24. 若被保人发生了部分提取，Cover Reset 后保额会？", options: ["保持不变", "恢复到初始金额", "减少50%", "永久失效"], answer: 1, exp: "会恢复到初始金额。" },
+    { q: "25. 该产品允许的保费分配（Premium Allocation）是？", options: ["仅限一种基金", "可分配至多种投资账户", "全部存入现金价值", "由公司指定"], answer: 1, exp: "可进行多样化分配。" },
+    { q: "26. 下列哪种情况会触发意外身故额外赔付？", options: ["自然死亡", "重大疾病", "自然灾害", "自杀"], answer: 2, exp: "自然灾害属于意外身故范畴。" },
+    { q: "27. 若保单由于部分提取导致保额降低，可以通过什么恢复？", options: ["再次加保", "Cover Reset", "更改投保人", "取消所有附加险"], answer: 1, exp: "Cover Reset 可恢复保额。" },
+    { q: "28. Manulife Heritage 在投保时，除了基本保费，还可以包含什么？", options: ["佣金", "附加险 Rider", "公司股票", "物业抵押"], answer: 1, exp: "可以附加各种 Rider。" },
+    { q: "29. 什么是 Renewal Benefit（续保利益）？", options: ["续交保费的奖励", "特定条件下的续保保障", "更换被保人的权利", "退保返还"], answer: 1, exp: "合同中的特定续保权益。" },
+    { q: "30. 为什么该产品适合长期持有？", options: ["因为有短期炒作价值", "因为有长期累积奖励和保额递增功能", "因为它没有风险", "因为它是银行存款"], answer: 1, exp: "长期累积奖励和保额递增是核心。" }
+];
+  
+    const container = document.getElementById('quiz-container');
+    questions.forEach((item, index) => {
+        let html = `<div class="question-card"><p><strong>${index+1}. ${item.q}</strong></p>`;
+        item.options.forEach((opt, i) => {
+            html += `<label class="option"><input type="radio" name="q${index}" value="${i}" onclick="updateProgress()"> <span>${opt}</span></label>`;
+        });
+        container.innerHTML += html + `</div>`;
+    });
+
+    function updateProgress() {
+        const total = questions.length;
+        const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+        document.getElementById('progress-fill').style.width = (answered / total * 100) + '%';
+    }
+
+    function submitQuiz() {
+        // ... (保持原本的评分逻辑)
+      if (score >= 80) {
+      showConfetti(); // 只要分数及格，就开始喷烟花！
+      alert("恭喜你！挑战成功！");
+      }
+    }
+  
+  // 在 script 最后加入这个函数
+  function showConfetti() {
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+    const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+        
+        const particleCount = 50 * (timeLeft / duration);
+        // 调用第三方烟花库 (需在头部引入下面这一行)
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+    }, 250);
+}
+</script>
+</body>
+</html>
